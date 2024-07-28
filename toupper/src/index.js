@@ -5,13 +5,80 @@ const { ethers } = require("ethers");
 const rollup_server = process.env.ROLLUP_HTTP_SERVER_URL;
 console.log("HTTP rollup_server url is " + rollup_server);
 
+function hex2str(hex) {
+  return ethers.toUtf8String(hex);
+}
+
+function str2hex(payload) {
+  return ethers.hexlify(toUtf8Bytes(payload));
+}
+
+function isNumeric(num) {
+  return !isNaN(num);
+}
+
+let users = [];
+let toUpperTotal = 0;
+
 async function handle_advance(data) {
   console.log("Received advance request data " + JSON.stringify(data));
+
+  const metadata = data["metadata"];
+  const sender = metadata["sender"];
+  const payload = data["payload"];
+
+  let sentence = hex2str(payload);
+  if (isNumeric(sentence)) {
+    // TODO: add error output
+    const report_req = await fetch(rollup_server + "/report", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ payload: str2hex("sentence is not on hex format!") }),
+    });
+
+    return "reject";
+  }
+
+  users.push(sender);
+  toUpperTotal += 1;
+
+  sentence = sentence.toUpperCase();
+  const notice_req = await fetch(rollup_server + "/notice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ payload: str2hex(sentence) }),
+    });
+
   return "accept";
 }
 
 async function handle_inspect(data) {
   console.log("Received inspect request data " + JSON.stringify(data));
+
+  const payload = data["payload"];
+  const route = hex2str(payload);
+
+  let responseObject;
+  if (route == "list") {
+    responseObject = JSON.stringify({users});
+  } else if (route == "total") {
+    responseObject = JSON.stringify({toUpperTotal});
+  } else {
+    responseObject = "route not implemented";
+  }
+
+  const report_req = await fetch(rollup_server + "/report", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ payload: str2hex(responseObject) }),
+    });
+
   return "accept";
 }
 
