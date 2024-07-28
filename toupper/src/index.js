@@ -9,8 +9,9 @@ function hex2str(hex) {
   return ethers.toUtf8String(hex);
 }
 
-function str2hex(payload) {
-  return ethers.hexlify(toUtf8Bytes(payload));
+
+function str2hex(string) {
+  return ethers.utils.hexlify(ethers.utils.toUtf8Bytes(string));
 }
 
 function isNumeric(num) {
@@ -24,7 +25,7 @@ async function handle_advance(data) {
   console.log("Received advance request data " + JSON.stringify(data));
 
   const metadata = data["metadata"];
-  const sender = metadata["sender"];
+  const sender = metadata["msg_sender"];
   const payload = data["payload"];
 
   let sentence = hex2str(payload);
@@ -35,7 +36,7 @@ async function handle_advance(data) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ payload: str2hex("sentence is not on hex format!") }),
+      body: JSON.stringify({ payload: str2hex("sentence is not on hex format") }),
     });
 
     return "reject";
