@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "TypeScript DApp",
   "dependencies": {
+    "@deroll/app": "^0.7.0",
+    "@deroll/wallet": "^0.8.0",
     "openapi-fetch": "^0.7",
     "viem": "^1"
   },
